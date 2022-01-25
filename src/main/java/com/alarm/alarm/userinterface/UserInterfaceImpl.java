@@ -1,9 +1,14 @@
 package com.alarm.alarm.userinterface;
 
+import com.alarm.alarm.AlarmApplication;
+import com.alarm.alarm.userinterface.IUserInterfaceContract;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Orientation;
 import javafx.scene.Group;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,42 +20,49 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
-public class UserInterfaceImpl implements //IUserInterfaceContract.View,
-        EventHandler<KeyEvent> {
+import com.alarm.alarm.AlarmApplication;
+
+public class UserInterfaceImpl {
     private final Stage stage;
-    private final Group root;
+    private final Parent root;
 
     private IUserInterfaceContract.EventListener listener;
 
-    //Size of the window
-    private static final double WINDOW_Y = 732;
-    private static final double WINDOW_X = 668;
-    //distance between window and board
-    private static final double BOARD_PADDING = 50;
+    private static final double WINDOW_Y = 700;
+    private static final double WINDOW_X = 500;
 
-    private static final double BOARD_X_AND_Y = 576;
     private static final Color WINDOW_BACKGROUND_COLOR = Color.rgb(0, 150, 136);
-    private static final Color BOARD_BACKGROUND_COLOR = Color.rgb(224, 242, 241);
-    private static final String SUDOKU = "Sudoku";
+    private static final String FILE_MAIN_VIEW = "mainView.fxml";
 
-    public UserInterfaceImpl(Stage stage) {
+
+    public UserInterfaceImpl(Stage stage) throws IOException {
         this.stage = stage;
-        this.root = new Group();
+        this.root = addRoot();
         initializeUserInterface();
     }
 
-
-    public void initializeUserInterface() {
-        stage.setTitle("Alarm");
-        drawBackground(root);
-        drawBlocksTilePane(root);
-        stage.show();
+    private Parent addRoot() throws IOException {
+        //FXMLLoader root = new FXMLLoader(AlarmApplication.class.getResource(FILE_MAIN_VIEW));
+        return FXMLLoader.load(Objects.requireNonNull(AlarmApplication.class.getResource(FILE_MAIN_VIEW)));
     }
 
-    private void drawBlocksTilePane(Group root) {
+    public void initializeUserInterface() throws IOException {
+        stage.setTitle("Alarm");
+        drawBackground();
+        stage.show();
+    }
+    private void drawBackground() throws IOException {
+        Scene scene = new Scene(root, WINDOW_X, WINDOW_Y);
+        scene.getStylesheets().add("/style/style.css");
+        stage.setTitle("Alarm");
+        stage.setScene(scene);
+    }
+
+    private void drawBlocksTilePane() {
         ArrayList<Button> Btns = new ArrayList<Button>();
 
         Button btn = new Button();
@@ -79,60 +91,6 @@ public class UserInterfaceImpl implements //IUserInterfaceContract.View,
             }
         });
 
-        root.getChildren().add(tile);
-    }
-
-    private void drawBackground(Group root) {
-        Scene scene = new Scene(root, WINDOW_X, WINDOW_Y);
-        scene.setFill(WINDOW_BACKGROUND_COLOR);
-        stage.setScene(scene);
-    }
-
-    private void drawTextFields(Group root) {
-
-    }
-
-    private void styleSudokuTile(SudokuTextField tile, double x, double y) {
-        /*Font numberFont = new Font(32);
-        tile.setFont(numberFont);
-        tile.setAlignment(Pos.CENTER);
-
-        tile.setLayoutX(x);
-        tile.setLayoutY(y);
-        tile.setPrefHeight(64);
-        tile.setPrefWidth(64);
-
-        tile.setBackground(Background.EMPTY);*/
-    }
-
-
-    private void drawGridLines(Group root) {
-
-    }
-
-
-
-    private void drawSudokuBoard(Group root) {
-        Rectangle boardBackground = new Rectangle();
-        boardBackground.setX(BOARD_PADDING);
-        boardBackground.setY(BOARD_PADDING);
-        boardBackground.setWidth(BOARD_X_AND_Y);
-        boardBackground.setHeight(BOARD_X_AND_Y);
-        boardBackground.setFill(BOARD_BACKGROUND_COLOR);
-        root.getChildren().add(boardBackground);
-    }
-
-    private void drawTitle(Group root) {
-        Text title = new Text(235, 690, SUDOKU);
-        title.setFill(Color.WHITE);
-        Font titleFont = new Font(43);
-        title.setFont(titleFont);
-        root.getChildren().add(title);
-    }
-
-
-    @Override
-    public void handle(KeyEvent event) {
-
+        //root.getChildren().add(tile);
     }
 }

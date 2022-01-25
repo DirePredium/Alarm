@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.TilePane?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<ScrollPane xmlns="http://javafx.com/javafx/1.8.0.261" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.alarm.alarm.MainController">
+    <TilePane orientation="VERTICAL" fx:id="tilePane" >
+        <HBox fx:id="vBox1">
+            <Button fx:id="fxButton" text="clickMe" onAction="#click" styleClass="button"/>
+            <Button fx:id="fxButton2" text="clickMe" onAction="#click" styleClass="button"/>
+        </HBox>
+        <HBox>
+            <Button fx:id="fxButton3" text="clickMe" onAction="#click" styleClass="button"/>
+            <Button fx:id="fxButton4" text="clickMe" onAction="#click" styleClass="button"/>
+        </HBox>
+    </TilePane>
+
+</ScrollPane>
