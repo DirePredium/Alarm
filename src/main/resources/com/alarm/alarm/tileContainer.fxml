@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.text.Font?>
+<HBox  fx:controller="com.alarm.alarm.MainController" fx:id="TileHBox" alignment="TOP_CENTER" prefHeight="97.0" prefWidth="474.0" style="-fx-background-color: #D9DAFF;" xmlns:fx="http://javafx.com/fxml/1" translateY="5.0">
+    <children>
+        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Описание" translateX="-70.0" translateY="20.0">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Text>
+        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Время" translateX="-135.0" translateY="40.0">
+            <font>
+                <Font size="20.0" />
+            </font>
+        </Text>
+        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Дата" translateX="75.0" translateY="35.0">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Text>
+        <ToggleButton mnemonicParsing="false" style="-fx-border-color: #ccc; -fx-border-radius: 5px;" text="Вкл/Выкл" translateX="79.0" translateY="33.0" />
+    </children>
+    <cursor>
+        <Cursor fx:constant="DEFAULT" />
+    </cursor>
+</HBox>

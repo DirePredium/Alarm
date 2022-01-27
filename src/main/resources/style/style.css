@@ -1,7 +1,6 @@
 .button {
     -fx-font-size: 15px;
     -fx-border-color: #000;
-
 }
 #fxButton {
     -fx-fill: yellow;
