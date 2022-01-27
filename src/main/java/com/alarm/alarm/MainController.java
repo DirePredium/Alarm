@@ -17,19 +17,24 @@ import javafx.scene.layout.TilePane;
 import javafx.scene.text.Text;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainController {
     @FXML
     public Text momentDate;
     @FXML
-    public ImageView calendarImg;
+    public TilePane calendar;
     @FXML
     private ScrollPane canvas;
     private EventHandler<ActionEvent> AlarmHandler;
-    private static ArrayList<HBox> tilesArray = new ArrayList<HBox>();
+    private static ArrayList<Alarm> tilesArray = new ArrayList<Alarm>();
     @FXML
     public Text momentTime;
     @FXML
@@ -43,19 +48,21 @@ public class MainController {
     @FXML
     public HBox TileHBox;
 
-    private static MyThread momentDateTime;
+    private static Date momentDateTime;
     private static MyThread momentDateThreade;
 
-    private static double applicationHeight = 219;
+    private static DatePicker datePicker;
 
+    private static double applicationHeight = 219;
     @FXML
     private void initialize() {
         if(momentDateThreade == null){
             momentDateThreade = new MyThread();
+            createCalendar();
         }
     }
 
-    private void transformationTileNodes(ObservableList<Node> observableList){
+    private void transformationTileNodes(ObservableList<Node> observableList, long today) throws ParseException {
         Text descriptionUserIntarface = (Text) observableList.get(0);
         Text timeUserIntarface = (Text) observableList.get(1);
         Text dateUserIntarface = (Text) observableList.get(2);
@@ -63,7 +70,17 @@ public class MainController {
 
         descriptionUserIntarface.setText(description.getText());
         timeUserIntarface.setText(hours.getText()+":"+minutes.getText());
-        dateUserIntarface.setText("Date");
+
+
+        String dateInString = datePicker.getValue().toString();
+        Date date = new SimpleDateFormat("yyyy-MM-dd").parse(dateInString);
+
+        LocalDate localDate = date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+
+        dateUserIntarface.setText(localDate.toString());
     }
 
     private void setAlarmHandler(){
@@ -99,6 +116,7 @@ public class MainController {
                     SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat(
                             "HH:mm:ss", Locale.getDefault());// dd:MMMM:yyyy HH:mm:ss a
                     final String strDate1 = simpleDateFormat1.format(calendar.getTime());
+                    final Date today = calendar.getTime();
                     SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat(
                             "dd MMMM yyyy", Locale.getDefault());// dd:MMMM:yyyy HH:mm:ss a
                     final String strDate2 = simpleDateFormat2.format(calendar.getTime());
@@ -106,6 +124,8 @@ public class MainController {
 
                     momentTime.setText(strDate1);
                     momentDate.setText(strDate2);
+
+                    momentDateTime = today;
 
                     Thread.sleep(500);
                 }
@@ -116,23 +136,18 @@ public class MainController {
     }
 
     private void createCalendar(){
-        DatePicker startDatePicker = new DatePicker();
-        DatePicker endDatePicker = new DatePicker();
-
-        startDatePicker.setValue(LocalDate.now());
-        endDatePicker.setValue(startDatePicker.getValue().plusDays(1));
-
-        tilePane.getChildren().add(new Label("Start Date:"));
-        tilePane.getChildren().add(startDatePicker);
-
-        System.out.println(startDatePicker);//+endDatePicker
+        datePicker = new DatePicker();
+        datePicker.setValue(LocalDate.now());
+        calendar.getChildren().add(datePicker);
     }
     @FXML
-    protected void click() throws IOException {
-        createCalendar();
+    protected void click() throws IOException, ParseException {
+        String dateInString = datePicker.getValue().toString()+' '+hours.getText()+':'+minutes.getText();
+        Date today = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateInString);
+        Alarm newAlarm = new Alarm(today);
         HBox tileContainer = FXMLLoader.load(Objects.requireNonNull(AlarmApplication.class.getResource("tileContainer.fxml")));
-        transformationTileNodes(tileContainer.getChildren());
-        tilesArray.add(tileContainer);
+        transformationTileNodes(tileContainer.getChildren(), newAlarm.getTimeEnd(momentDateTime));
+        tilesArray.add(newAlarm);
         tilePane.getChildren().add(tileContainer);
         addHeight();
     }
@@ -142,10 +157,5 @@ public class MainController {
         if(applicationHeight>400){
             tilePane.setPrefHeight(applicationHeight + 97.0);
         }
-    }
-
-    public void imgClick(MouseEvent mouseEvent) {
-        System.out.println("AUE");
-        createCalendar();
     }
 }
