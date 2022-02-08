@@ -127,6 +127,11 @@ public class MainController {
 
                     momentDateTime = today;
 
+                    if(tilesArray.get(0).getIsWork()){
+                        Thread ....
+                        tilesArray.get(0).setDateNull();
+                    }
+
                     if(tilesArray != null){
                         if(tilesArray.get(0).getTimeEnd(momentDateTime) < 0){
                             momentTime.setText("Work");

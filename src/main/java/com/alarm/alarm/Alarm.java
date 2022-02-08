@@ -22,4 +22,15 @@ public class Alarm {
         long result =  alarmDate.getTime()-today.getTime();
         return result;
     }
+
+    public void setDateNull(){
+        this.alarmDate = null;
+    }
+
+    public boolean getIsWork(){
+        if(alarmDate != null){
+            return true;
+        }
+        return false;
+    }
 }
