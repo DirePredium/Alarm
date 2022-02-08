@@ -34,7 +34,7 @@ public class MainController {
     @FXML
     private ScrollPane canvas;
     private EventHandler<ActionEvent> AlarmHandler;
-    private static ArrayList<Alarm> tilesArray = new ArrayList<Alarm>();
+    private static ArrayList<Alarm> tilesArray;
     @FXML
     public Text momentTime;
     @FXML
@@ -127,6 +127,13 @@ public class MainController {
 
                     momentDateTime = today;
 
+                    if(tilesArray != null){
+                        if(tilesArray.get(0).getTimeEnd(momentDateTime) < 0){
+                            momentTime.setText("Work");
+                        }
+                    }
+
+
                     Thread.sleep(500);
                 }
             } catch (InterruptedException e) {
@@ -142,6 +149,9 @@ public class MainController {
     }
     @FXML
     protected void click() throws IOException, ParseException {
+        if(tilesArray == null){
+            tilesArray = new ArrayList<Alarm>();
+        }
         String dateInString = datePicker.getValue().toString()+' '+hours.getText()+':'+minutes.getText();
         Date today = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateInString);
         Alarm newAlarm = new Alarm(today);
