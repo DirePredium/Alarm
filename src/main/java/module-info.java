@@ -1,6 +1,7 @@
 module com.alarm.alarm {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.desktop;
 
 
     opens com.alarm.alarm to javafx.fxml;

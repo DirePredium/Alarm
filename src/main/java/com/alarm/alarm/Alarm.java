@@ -7,6 +7,10 @@ import java.util.Date;
 
 public class Alarm {
 
+    public Date getAlarmDate() {
+        return alarmDate;
+    }
+
     private Date alarmDate;
     private static int globalId = 0;
     private int id;
