@@ -58,10 +58,10 @@ public class MainController {
 
     private static double applicationHeight = 219;
     @FXML
-    private void initialize() {
+    private void initialize() {      // происходит когда загружается страницка
         if(momentDateThreade == null){
-            momentDateThreade = new MyThread();
-            createCalendar();
+            momentDateThreade = new MyThread();   // загружаем ветку с изменением времени основного(каждые 500 мс)
+            createCalendar(); // создаем дата пикер
         }
     }
 
@@ -86,84 +86,56 @@ public class MainController {
         dateUserIntarface.setText(localDate.toString());
     }
 
-    private void setAlarmHandler(){
-        this.AlarmHandler  = new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                System.out.println("Click!!!");
-                Button btn4 = new Button("clickMe");
-                Button btn5 = new Button("clickMe");
-                btn4.setOnAction(AlarmHandler);
-                btn5.setOnAction(AlarmHandler);
-                FlowPane gr1 = new FlowPane(btn4, btn5);
-                tilePane.getChildren().add(gr1);
-            }
-        };
-    }
-
-
     public class MyThread extends Thread {
 
         // Конструктор
         MyThread() {
             // Создаём новый поток
-            super("Второй поток");
-            System.out.println("Создан второй поток ");
-            start();
+            super();  // загугли
+            start(); // заупускаем ветку, то есть метод ран
         }
 
         public void run() {
-            System.out.println("!!!");
             try {
-                while (true){
-                    Calendar calendar = Calendar.getInstance();
+                while (true){ // созадем цыкл который отрабатывает каждые 500 мс
+                    Calendar calendar = Calendar.getInstance(); // создаем экземпляр календаря
                     SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat(
-                            "HH:mm:ss", Locale.getDefault());// dd:MMMM:yyyy HH:mm:ss a
-                    final String strDate1 = simpleDateFormat1.format(calendar.getTime());
-                    final Date today = calendar.getTime();
+                            "HH:mm:ss", Locale.getDefault());// шаблон форматировантя строки для времеени
+                    final String strDate1 = simpleDateFormat1.format(calendar.getTime());  // почитай про финал  // берем текущую дату и переводим в дату
+                    final Date today = calendar.getTime(); // берем текущую дату
                     SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat(
-                            "dd MMMM yyyy", Locale.getDefault());// dd:MMMM:yyyy HH:mm:ss a
-                    final String strDate2 = simpleDateFormat2.format(calendar.getTime());
+                            "dd MMMM yyyy", Locale.getDefault());// шаблон форматировантя строки для даты
+                    final String strDate2 = simpleDateFormat2.format(calendar.getTime());  // берем текущую дату и переводим в время
 
 
-                    momentTime.setText(strDate1);
+                    momentTime.setText(strDate1); // отрисовываем
                     momentDate.setText(strDate2);
 
-                    momentDateTime = today;
+                    momentDateTime = today; // для удобства записываем текущую дату в статик momentDateTime
 
                     if(tilesArray != null){
-                        if(firstAlarm != null && firstAlarm.getIsWork() && firstAlarm.getTimeEnd(momentDateTime) < 0){
-                            Runnable task = new Runnable() {
+                        if(firstAlarm != null && firstAlarm.getIsWork() && firstAlarm.getTimeEnd(momentDateTime) < 0){ // если с будильником который должен быть первым всё ок - идём дальше
+                            Runnable task = new Runnable() { // создаем анонимный класс с выполнением асинхронной ветки для передачи звука
                                 boolean finishThread = false;
                                 public void run() {
                                     try {
                                         if(!finishThread){
-                                            Sound.playSound("E:\\Alarm\\Alarm\\src\\main\\resources\\sound\\alarmsound.wav").join();
                                             firstAlarm = getFirstAlarm(tilesArray);
+                                            Sound.playSound("C:\\Projeckts\\Java\\Alarm\\src\\main\\resources\\sound\\alarmsound.wav").join();
                                         }
                                         TimeUnit.SECONDS.sleep(1);
-                                        finishThread = true;
+                                        return;
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
                                     }
                                 }
                             };
                             Thread thread = new Thread(task);
-                            thread.start();
+                            thread.start(); // запускаем ветку
 
-                            tilesArray.get(0).setDateNull();
+                            tilesArray.get(0).setDateNull(); // передаем будильнику то что он отзвонил, ставим его время на налл
                         }
                     }
-
-
-                   /* if(tilesArray != null){
-                        if(tilesArray.get(0).getTimeEnd(momentDateTime) < 0){
-                           // momentTime.setText("Work");
-                            Sound.playSound("E:\\Alarm\\Alarm\\src\\main\\resources\\sound\\alarmsound.wav").join();
-                        }
-                    }*/
-
-
                     Thread.sleep(500);
                 }
             } catch (InterruptedException e) {
@@ -173,37 +145,48 @@ public class MainController {
     }
 
     private void createCalendar(){
-        datePicker = new DatePicker();
-        datePicker.setValue(LocalDate.now());
-        calendar.getChildren().add(datePicker);
+        datePicker = new DatePicker(); // созадем экземпляр элемента джава фх, а именно календаря
+        datePicker.setValue(LocalDate.now()); // ставим дату сегодняшнюю
+        calendar.getChildren().add(datePicker); // довалвляем на один из элементов джава фх(тайл пен)
     }
     @FXML
     protected void click() throws IOException, ParseException {
-        if(tilesArray == null){
+        if(tilesArray == null){  // если нету будильников создаем их(масив)
             tilesArray = new ArrayList<Alarm>();
         }
+        String dateInString = datePicker.getValue().toString()+' '+hours.getText()+':'+minutes.getText(); // берем значения от пользователя
+        if(getAlarmDate(dateInString) == null){ // проверяем можем ли мы создать такую дату
+            return;
+        }
+        Alarm newAlarm = new Alarm(getAlarmDate(dateInString)); // создаем класс Будильник
+        HBox tileContainer = FXMLLoader.load(Objects.requireNonNull(AlarmApplication.class.getResource("tileContainer.fxml"))); // создаем элемент джава фх будильника
+        transformationTileNodes(tileContainer.getChildren(), newAlarm.getTimeEnd(momentDateTime)); // он наполняет элемент созданный для будильника
+        tilesArray.add(newAlarm); // добавляем новый будильник в масив будильников
+        firstAlarm = getFirstAlarm(tilesArray); // определяем статическую переменную которая означает какой будильник отработает первым
+        tilePane.getChildren().add(tileContainer); // добавляем элемент на страничку приложения
+        addHeight(); // если надо добавляем высоту
+    }
 
-        String dateInString = datePicker.getValue().toString()+' '+hours.getText()+':'+minutes.getText();
-        Date today = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateInString);
-        Alarm newAlarm = new Alarm(today);
-        HBox tileContainer = FXMLLoader.load(Objects.requireNonNull(AlarmApplication.class.getResource("tileContainer.fxml")));
-        transformationTileNodes(tileContainer.getChildren(), newAlarm.getTimeEnd(momentDateTime));
-        tilesArray.add(newAlarm);
-        firstAlarm = getFirstAlarm(tilesArray);
-        tilePane.getChildren().add(tileContainer);
-        addHeight();
+    private Date getAlarmDate(String dateInString){
+        try {
+            Date today = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateInString);
+            return today;
+        }catch (Exception e){ // Отлавливает ошибки, в нашем случае ошибку нулевой даты или неправильно заданной
+            System.out.println(e); // выводит ошибку в консоль
+            return null;
+        }
     }
 
     private Alarm getFirstAlarm(ArrayList<Alarm> tilesArray) {
         Alarm firstAlarmTemp;
-        if(firstAlarm == null){
+        if(firstAlarm == null){ // если будильника след нету - создаем
             firstAlarmTemp = tilesArray.get(0);
         }else {
-            firstAlarmTemp = firstAlarm;
+            firstAlarmTemp = firstAlarm; // иначе берем сущеествующий
         }
-        for(int i = 0; i != tilesArray.size(); i++){
-            if(firstAlarmTemp.getAlarmDate() == null && tilesArray.get(i) != null){
-                if(tilesArray.get(i).getAlarmDate() != null){
+        for(int i = 0; i != tilesArray.size(); i++){   // цыклом перебираем будильники
+            if(firstAlarmTemp.getAlarmDate() == null && tilesArray.get(i) != null){ // если звёзды сошлись заполняем будильник который будильник звонить
+                if(tilesArray.get(i).getAlarmDate() != null){  // если будильнк рабочий
                     firstAlarmTemp = tilesArray.get(i);
                 }
             }
@@ -211,14 +194,14 @@ public class MainController {
                 long fA = firstAlarmTemp.getAlarmDate().getTime();
                 long tA = tilesArray.get(i).getAlarmDate().getTime();
                 if(fA > tA){
-                    firstAlarmTemp = tilesArray.get(i);
+                    firstAlarmTemp = tilesArray.get(i);   // перезаполняем будильник если создан еще какой-то который перезвонит быстрее
                 }
             }
         }
         return firstAlarmTemp;
     }
 
-    private void addHeight(){
+    private void addHeight(){ // добавляем расстояние для будильников если не хватает
         applicationHeight += 97;
         if(applicationHeight>400){
             tilePane.setPrefHeight(applicationHeight + 97.0);

@@ -17,15 +17,12 @@ public class AlarmApplication extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-
-
-        uiImpl = new UserInterfaceImpl(primaryStage);
+        uiImpl = new UserInterfaceImpl(primaryStage); // создает экземпляр класс UserInterfaceImpl и передает туда страницу приложения джава фх
     }
 
     public static void main(String[] args) {
-        launch(args);
+        launch(args); // запускается джава fx
     }
-
 }
 
 

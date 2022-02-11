@@ -40,57 +40,23 @@ public class UserInterfaceImpl {
 
 
     public UserInterfaceImpl(Stage stage) throws IOException {
-        this.stage = stage;
-        this.root = addRoot();
-        initializeUserInterface();
+        this.stage = stage;    //записываем стейдж в поля объекта
+        this.root = addRoot();  //записываем подключение к файлу фхмл, что бы он отрисовывал страницу
+        initializeUserInterface(); // идем в метод инициализации стейджа
     }
 
     private Parent addRoot() throws IOException {
-        //FXMLLoader root = new FXMLLoader(AlarmApplication.class.getResource(FILE_MAIN_VIEW));
-        return FXMLLoader.load(Objects.requireNonNull(AlarmApplication.class.getResource(FILE_MAIN_VIEW)));
+        return FXMLLoader.load(Objects.requireNonNull(AlarmApplication.class.getResource(FILE_MAIN_VIEW))); //подключает файл(FILE_MAIN_VIEW) фхмл
     }
 
     public void initializeUserInterface() throws IOException {
-        stage.setTitle("Alarm");
-        drawBackground();
+        stage.setTitle("Alarm");   // задаем титл
+        drawBackground();   // отрисовываем ззадний фон
         stage.show();
     }
     private void drawBackground() throws IOException {
-        Scene scene = new Scene(root, WINDOW_X, WINDOW_Y);
-        scene.getStylesheets().add("/style/style.css");
-        stage.setTitle("Alarm");
-        stage.setScene(scene);
-    }
-
-    private void drawBlocksTilePane() {
-        ArrayList<Button> Btns = new ArrayList<Button>();
-
-        Button btn = new Button();
-        btn.setText("Click1");
-        Btns.add(btn);
-        Label label2 = new Label("Label2");
-        Label label3 = new Label("Label3");
-        Label label4 = new Label("Label4");
-        Label label5 = new Label("Label5");
-        Label label6 = new Label("Label6");
-        Label label7 = new Label("Label7");
-        Label labelx = new Label("Label1");
-        FlowPane gr1 = new FlowPane(labelx);
-
-        //VBox root = new VBox(10, btn, label2, label3, label4, label5, label6, label7);
-        TilePane tile = new TilePane(Orientation.VERTICAL, btn, label2, label3, label4, label5, label6, label7);
-        tile.getChildren().add(gr1);
-        tile.setPrefTileWidth(Double.MAX_VALUE);
-        btn.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                Label label1 = new Label("Label1");
-                Button btn5 = new Button("Btn1");
-                FlowPane gr1 = new FlowPane(btn5, label1);
-                tile.getChildren().add(gr1);
-            }
-        });
-
-        //root.getChildren().add(tile);
+        Scene scene = new Scene(root, WINDOW_X, WINDOW_Y);  // в сцену передаем (корень отрисовки, размер по высоте, по ширине)
+        scene.getStylesheets().add("/style/style.css");  // подключаем стили цсс к нашей страницке
+        stage.setScene(scene); // теперь берем экземпляр создаваемого стейджа приложения и отрисовывем сцену
     }
 }
