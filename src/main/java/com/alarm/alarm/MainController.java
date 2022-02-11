@@ -16,6 +16,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.TilePane;
 import javafx.scene.text.Text;
 
+import javax.xml.transform.Result;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -25,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class MainController {
     @FXML
@@ -52,6 +54,7 @@ public class MainController {
     private static MyThread momentDateThreade;
 
     private static DatePicker datePicker;
+    private static Alarm firstAlarm;
 
     private static double applicationHeight = 219;
     @FXML
@@ -100,6 +103,7 @@ public class MainController {
 
 
     public class MyThread extends Thread {
+
         // Конструктор
         MyThread() {
             // Создаём новый поток
@@ -127,16 +131,37 @@ public class MainController {
 
                     momentDateTime = today;
 
-                    if(tilesArray.get(0).getIsWork()){
-                        Thread ....
-                        tilesArray.get(0).setDateNull();
-                    }
-
                     if(tilesArray != null){
-                        if(tilesArray.get(0).getTimeEnd(momentDateTime) < 0){
-                            momentTime.setText("Work");
+                        if(firstAlarm != null && firstAlarm.getIsWork() && firstAlarm.getTimeEnd(momentDateTime) < 0){
+                            Runnable task = new Runnable() {
+                                boolean finishThread = false;
+                                public void run() {
+                                    try {
+                                        if(!finishThread){
+                                            Sound.playSound("E:\\Alarm\\Alarm\\src\\main\\resources\\sound\\alarmsound.wav").join();
+                                            firstAlarm = getFirstAlarm(tilesArray);
+                                        }
+                                        TimeUnit.SECONDS.sleep(1);
+                                        finishThread = true;
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            };
+                            Thread thread = new Thread(task);
+                            thread.start();
+
+                            tilesArray.get(0).setDateNull();
                         }
                     }
+
+
+                   /* if(tilesArray != null){
+                        if(tilesArray.get(0).getTimeEnd(momentDateTime) < 0){
+                           // momentTime.setText("Work");
+                            Sound.playSound("E:\\Alarm\\Alarm\\src\\main\\resources\\sound\\alarmsound.wav").join();
+                        }
+                    }*/
 
 
                     Thread.sleep(500);
@@ -157,14 +182,40 @@ public class MainController {
         if(tilesArray == null){
             tilesArray = new ArrayList<Alarm>();
         }
+
         String dateInString = datePicker.getValue().toString()+' '+hours.getText()+':'+minutes.getText();
         Date today = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(dateInString);
         Alarm newAlarm = new Alarm(today);
         HBox tileContainer = FXMLLoader.load(Objects.requireNonNull(AlarmApplication.class.getResource("tileContainer.fxml")));
         transformationTileNodes(tileContainer.getChildren(), newAlarm.getTimeEnd(momentDateTime));
         tilesArray.add(newAlarm);
+        firstAlarm = getFirstAlarm(tilesArray);
         tilePane.getChildren().add(tileContainer);
         addHeight();
+    }
+
+    private Alarm getFirstAlarm(ArrayList<Alarm> tilesArray) {
+        Alarm firstAlarmTemp;
+        if(firstAlarm == null){
+            firstAlarmTemp = tilesArray.get(0);
+        }else {
+            firstAlarmTemp = firstAlarm;
+        }
+        for(int i = 0; i != tilesArray.size(); i++){
+            if(firstAlarmTemp.getAlarmDate() == null && tilesArray.get(i) != null){
+                if(tilesArray.get(i).getAlarmDate() != null){
+                    firstAlarmTemp = tilesArray.get(i);
+                }
+            }
+            if(firstAlarmTemp.getAlarmDate() != null && tilesArray.get(i).getAlarmDate() != null ){
+                long fA = firstAlarmTemp.getAlarmDate().getTime();
+                long tA = tilesArray.get(i).getAlarmDate().getTime();
+                if(fA > tA){
+                    firstAlarmTemp = tilesArray.get(i);
+                }
+            }
+        }
+        return firstAlarmTemp;
     }
 
     private void addHeight(){
