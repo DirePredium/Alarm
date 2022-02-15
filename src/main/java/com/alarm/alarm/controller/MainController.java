@@ -1,30 +1,28 @@
-package com.alarm.alarm;
+package com.alarm.alarm.controller;
 
-import com.alarm.alarm.userinterface.IUserInterfaceContract;
+import com.alarm.alarm.object.Alarm;
+import com.alarm.alarm.AlarmApplication;
+import com.alarm.alarm.object.Sound;
+import com.alarm.alarm.userinterface.ModalWindow;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.TilePane;
 import javafx.scene.text.Text;
 
-import javax.xml.transform.Result;
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -35,7 +33,6 @@ public class MainController {
     public TilePane calendar;
     @FXML
     private ScrollPane canvas;
-    private EventHandler<ActionEvent> AlarmHandler;
     private static ArrayList<Alarm> tilesArray;
     @FXML
     public Text momentTime;
@@ -47,11 +44,8 @@ public class MainController {
     public TextField minutes;
     @FXML
     public TextField description;
-    @FXML
-    public HBox TileHBox;
 
     private static Date momentDateTime;
-    private static MyThread momentDateThreade;
 
     private static DatePicker datePicker;
     private static Alarm firstAlarm;
@@ -59,10 +53,9 @@ public class MainController {
     private static double applicationHeight = 219;
     @FXML
     private void initialize() {      // происходит когда загружается страницка
-        if(momentDateThreade == null){
-            momentDateThreade = new MyThread();   // загружаем ветку с изменением времени основного(каждые 500 мс)
-            createCalendar(); // создаем дата пикер
-        }
+        AlarmHandler alarmHandler = new AlarmHandler();
+        MomentDate momentDate = new MomentDate();   // загружаем ветку с изменением времени основного(каждые 500 мс)
+        createCalendar(); // создаем дата пикер
     }
 
     private void transformationTileNodes(ObservableList<Node> observableList, long today) throws ParseException {
@@ -70,26 +63,60 @@ public class MainController {
         Text timeUserIntarface = (Text) observableList.get(1);
         Text dateUserIntarface = (Text) observableList.get(2);
         ToggleButton nade4 = (ToggleButton) observableList.get(3);
-
         descriptionUserIntarface.setText(description.getText());
         timeUserIntarface.setText(hours.getText()+":"+minutes.getText());
-
-
         String dateInString = datePicker.getValue().toString();
         Date date = new SimpleDateFormat("yyyy-MM-dd").parse(dateInString);
-
         LocalDate localDate = date.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
-
-
         dateUserIntarface.setText(localDate.toString());
     }
+    public class AlarmHandler extends Thread {
+        AlarmHandler() {
+            // Создаём новый поток
+            super();  // загугли
+            start(); // заупускаем ветку, то есть метод ран
+        }
 
-    public class MyThread extends Thread {
+        public void run() {
+            try {
+                File fileSound = new File(new File("").getAbsolutePath()+"\\src\\main\\resources\\sound\\alarmsound.wav");
+                Sound sound = new Sound(fileSound);
+                long alarmFin = 0;
+                Runnable task = new Runnable() { // создаем анонимный класс с выполнением асинхронной ветки для передачи звука
+                    public void run() {
+                        if(!sound.isPlaying()){
+                            sound.play();
+                        }
+                    }
+                };
+                while (true){ // созадем цыкл который отрабатывает каждые 500 мс
+                    if(tilesArray != null){
+                        if(firstAlarm != null && firstAlarm.getIsWork() && firstAlarm.getTimeEnd(momentDateTime) < 0){ // если с будильником который должен быть первым всё ок - идём дальше
+                            firstAlarm = getFirstAlarm(tilesArray);
+                            Thread thread = new Thread(task);
+                            thread.start();
+                            //ModalWindow.newWindow();
+                            addModalWindow();
+                            alarmFin = momentDateTime.getTime()+5000;
+                            tilesArray.get(0).setDateNull(); // передаем будильнику то что он отзвонил, ставим его время на налл
+                        }
+                    }
+                    if(alarmFin != 0 && sound.isPlaying() && alarmFin - momentDateTime.getTime() < 0){
+                        sound.close();
+                    }
+                    //new modAlert(Alert.AlertType.INFORMATION, "Антивирусные базы обновлены").Show();
+                    Thread.sleep(500);
+                }
+            } catch (InterruptedException e) {
+                System.out.println("Второй поток прерван");
+            }
+        }
+    }
 
-        // Конструктор
-        MyThread() {
+    public class MomentDate extends Thread {
+        MomentDate() {
             // Создаём новый поток
             super();  // загугли
             start(); // заупускаем ветку, то есть метод ран
@@ -112,34 +139,10 @@ public class MainController {
                     momentDate.setText(strDate2);
 
                     momentDateTime = today; // для удобства записываем текущую дату в статик momentDateTime
-
-                    if(tilesArray != null){
-                        if(firstAlarm != null && firstAlarm.getIsWork() && firstAlarm.getTimeEnd(momentDateTime) < 0){ // если с будильником который должен быть первым всё ок - идём дальше
-                            Runnable task = new Runnable() { // создаем анонимный класс с выполнением асинхронной ветки для передачи звука
-                                boolean finishThread = false;
-                                public void run() {
-                                    try {
-                                        if(!finishThread){
-                                            firstAlarm = getFirstAlarm(tilesArray);
-                                            Sound.playSound("C:\\Projeckts\\Java\\Alarm\\src\\main\\resources\\sound\\alarmsound.wav").join();
-                                        }
-                                        TimeUnit.SECONDS.sleep(1);
-                                        return;
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            };
-                            Thread thread = new Thread(task);
-                            thread.start(); // запускаем ветку
-
-                            tilesArray.get(0).setDateNull(); // передаем будильнику то что он отзвонил, ставим его время на налл
-                        }
-                    }
                     Thread.sleep(500);
                 }
             } catch (InterruptedException e) {
-                System.out.println("Второй поток прерван");
+                System.out.println("Поток прерван");
             }
         }
     }
@@ -150,21 +153,81 @@ public class MainController {
         calendar.getChildren().add(datePicker); // довалвляем на один из элементов джава фх(тайл пен)
     }
     @FXML
-    protected void click() throws IOException, ParseException {
-        if(tilesArray == null){  // если нету будильников создаем их(масив)
-            tilesArray = new ArrayList<Alarm>();
-        }
-        String dateInString = datePicker.getValue().toString()+' '+hours.getText()+':'+minutes.getText(); // берем значения от пользователя
-        if(getAlarmDate(dateInString) == null){ // проверяем можем ли мы создать такую дату
+    protected void addAlarm() throws IOException {
+        if(Integer.parseInt(hours.getText()) <= 0
+        || Integer.parseInt(hours.getText()) > 23
+        || Integer.parseInt(minutes.getText()) <= 0
+        || Integer.parseInt(minutes.getText()) > 59){
             return;
         }
+        String dateInString = datePicker.getValue().toString() + ' ' + hours.getText() + ':' + minutes.getText(); // берем значения от пользователя
         Alarm newAlarm = new Alarm(getAlarmDate(dateInString)); // создаем класс Будильник
+        if (getAlarmDate(dateInString) == null) { // проверяем можем ли мы создать такую дату
+            return;
+        }
+        addAlarmToMemory(newAlarm, dateInString);
+        firstAlarm = getFirstAlarm(tilesArray); // определяем статическую переменную которая означает какой будильник отработает первым
+        try{
+            addTileElement(newAlarm);
+        }catch (IOException | ParseException IOe){
+            throw new IOException(IOe);
+        }
+        if(ifAppHigher()){// если надо добавляем высоту
+            addHeight();
+        }
+    }
+
+    private void addModalWindow(){
+        Thread asd = new Thread(new Runnable() {
+            @Override public void run() {
+                Platform.runLater(new Runnable() {
+                    @Override public void run() {
+                        new modAlert(Alert.AlertType.INFORMATION, "Будильник сработал").Show();
+                    }
+                });
+            }});
+        asd.start();
+    }
+
+    class modAlert extends Alert {
+
+        private Thread thread;
+        private javafx.stage.Window window;
+
+        public modAlert(AlertType alertType, String contentText, ButtonType... buttons) {
+            super(alertType, contentText, buttons);
+            setHeaderText("Внимание");
+            window = getDialogPane().getScene().getWindow();
+            System.out.println(window);
+            thread = new Thread(() -> {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException ignored) {
+                }
+                long startTime = System.currentTimeMillis();
+                while (System.currentTimeMillis() - startTime < 1000) {
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException ignored) {
+                    }
+                    Platform.runLater(() -> window.setOpacity(Math.max(0, window.getOpacity() - .05)));
+                }
+                Platform.runLater(this::close);
+            });
+
+        }
+
+        void Show() {
+            show();
+            thread.start();
+        }
+    }
+
+    private void addTileElement(Alarm newAlarm) throws IOException, ParseException {
         HBox tileContainer = FXMLLoader.load(Objects.requireNonNull(AlarmApplication.class.getResource("tileContainer.fxml"))); // создаем элемент джава фх будильника
         transformationTileNodes(tileContainer.getChildren(), newAlarm.getTimeEnd(momentDateTime)); // он наполняет элемент созданный для будильника
-        tilesArray.add(newAlarm); // добавляем новый будильник в масив будильников
-        firstAlarm = getFirstAlarm(tilesArray); // определяем статическую переменную которая означает какой будильник отработает первым
         tilePane.getChildren().add(tileContainer); // добавляем элемент на страничку приложения
-        addHeight(); // если надо добавляем высоту
+        applicationHeight += 97;
     }
 
     private Date getAlarmDate(String dateInString){
@@ -173,6 +236,7 @@ public class MainController {
             return today;
         }catch (Exception e){ // Отлавливает ошибки, в нашем случае ошибку нулевой даты или неправильно заданной
             System.out.println(e); // выводит ошибку в консоль
+
             return null;
         }
     }
@@ -201,10 +265,21 @@ public class MainController {
         return firstAlarmTemp;
     }
 
-    private void addHeight(){ // добавляем расстояние для будильников если не хватает
-        applicationHeight += 97;
-        if(applicationHeight>400){
-            tilePane.setPrefHeight(applicationHeight + 97.0);
+    private void addAlarmToMemory(Alarm newAlarm, String dateInString) {
+        if(tilesArray == null){  // если нету будильников создаем их(масив)
+            tilesArray = new ArrayList<Alarm>();
         }
+        tilesArray.add(newAlarm); // добавляем новый будильник в масив будильников
+    }
+
+    private void addHeight(){ // добавляем расстояние для будильников если не хватает
+        tilePane.setPrefHeight(applicationHeight + 97.0);
+    }
+
+    private boolean ifAppHigher(){
+        if(applicationHeight>400){
+            return true;
+        }
+        return false;
     }
 }

@@ -1,4 +1,4 @@
-package com.alarm.alarm;
+package com.alarm.alarm.object;
 
 import javafx.scene.layout.TilePane;
 
@@ -16,7 +16,7 @@ public class Alarm {
     private int id;
     private TilePane tilePane;
 
-    Alarm(Date alarmDate){
+    public Alarm(Date alarmDate){
         this.alarmDate = alarmDate;
         this.id = globalId;
         globalId++;

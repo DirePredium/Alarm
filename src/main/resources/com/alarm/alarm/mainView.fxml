@@ -13,7 +13,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<ScrollPane fx:id="canvas" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="500.0" style="-fx-background-color: #fff;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.alarm.alarm.MainController">
+<ScrollPane fx:id="canvas" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="500.0" style="-fx-background-color: #fff;" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.alarm.alarm.controller.MainController">
     <content>
         <VBox maxWidth="1.7976931348623157E308">
             <children>
@@ -84,7 +84,7 @@
                                 </HBox>
                                 <HBox alignment="TOP_CENTER" prefHeight="42.0" prefWidth="393.0" translateY="10.0">
                                     <children>
-                                        <Button mnemonicParsing="false" onAction="#click" style="-fx-background-color: #fafafa; -fx-border-color: #ccc; -fx-border-radius: 5px;" styleClass="styles\main.css" text="Добавить" translateX="5.0" />
+                                        <Button mnemonicParsing="false" onAction="#addAlarm" style="-fx-background-color: #fafafa; -fx-border-color: #ccc; -fx-border-radius: 5px;" styleClass="styles\main.css" text="Добавить" translateX="5.0" />
                                     </children>
                                 </HBox>
                             </children>
